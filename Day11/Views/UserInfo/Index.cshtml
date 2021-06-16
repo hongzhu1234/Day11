@@ -1,0 +1,91 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Layui</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <script src="~/Scripts/jquery-3.4.1.js"></script>
+    <link href="~/Content/layui-v2.5.7/layui/css/layui.css" rel="stylesheet" />
+    <script src="~/Content/layui-v2.5.7/layui/layui.js"></script>
+    <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+</head>
+<body>
+
+    <table class="layui-hide" id="test" lay-filter="demo"></table>
+
+
+
+    <script>
+        layui.use('table', function () {
+            var table = layui.table;
+
+            table.render({
+                elem: '#test'
+                , url: '/UserInfo/UserInfoShow'
+                , cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+                , page: true
+                , limit: 2
+                , limits: [2, 4, 6, 8, 10]
+                ,id:"testReload"
+                , request: {
+                    pageName: "pindex",
+                    limitName: "psize"
+                }
+                , cols: [[
+                    { field: 'UserID', title: '用户ID' }
+                    , { field: 'UserName', title: '用户名称' }
+                    , { field: 'Pwd', title: '用户密码' }
+                    , { field: 'Email', title: '用户邮箱' }
+                    , { field: 'DeptName', title: '部门名称' }
+                    , { fixed: 'right', align: 'center', toolbar: '#barDemo' }
+                ]]
+            });
+
+            //监听工具条
+            table.on('tool(demo)', function (obj) {
+                console.log(obj);
+                var data = obj.data;
+                     if (obj.event === 'del') {
+                    layer.confirm('真的删除行么', function (index) {
+                        obj.del();
+                        layer.close(index);
+                    });
+                     } else if (obj.event === 'edit') {
+                         var tag = 0;
+                         //iframe层
+                         layer.open({
+                             type: 2,
+                             title: '修改',
+                             shadeClose: true,
+                             shade: 0.8,
+                             area: ['380px', '90%'],
+                             content: '/UserInfo/Edit?id=' + data.Id, //iframe的url
+                             cancel: function () {
+                                 tag = 1;
+                             },
+                             end: function () {
+                                 if (tag == 0) {
+
+                                     layui.table.reload('testReload', {}, 'data');
+                                 }
+                             }
+                         });
+                }
+            });
+
+        });
+    </script>
+    <script type="text/html" id="barDemo">
+        <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+    </script>
+
+</body>
+</html>

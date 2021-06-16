@@ -1,0 +1,108 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Layui</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <script src="~/Scripts/jquery-3.4.1.js"></script>
+    <script src="~/Content/layui-v2.5.7/layui/layui.js"></script>
+    <link href="~/Content/layui-v2.5.7/layui/css/layui.css" rel="stylesheet" />
+    <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+</head>
+<body>
+    <form class="layui-form" action="">
+        <div class="layui-form-item">
+            <label class="layui-form-label">父级Id</label>
+            <div class="layui-input-block">
+                <input type="text" id="txtPId" name="title" lay-verify="title" autocomplete="off" placeholder="请输入标题" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">菜单名称</label>
+            <div class="layui-input-block">
+                <input type="text" id="txtName" name="title" lay-verify="title" autocomplete="off" placeholder="请输入标题" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">资源路径</label>
+            <div class="layui-input-block">
+                <input type="text" id="txtResourceUrl" name="title" lay-verify="title" autocomplete="off" placeholder="请输入标题" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">是否开启</label>
+            <div class="layui-input-block">
+                <input type="checkbox" id="IsEnable" checked="" name="open" lay-skin="switch" lay-filter="switchTest" lay-text="ON|OFF">
+            </div>
+        </div>
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">描述</label>
+            <div class="layui-input-block">
+                <textarea id="txtRemark" placeholder="请输入内容" class="layui-textarea"></textarea>
+            </div>
+        </div>
+        <!--<div class="layui-form-item layui-form-text">
+          <label class="layui-form-label">编辑器</label>
+          <div class="layui-input-block">
+            <textarea class="layui-textarea layui-hide" name="content" lay-verify="content" id="LAY_demo_editor"></textarea>
+          </div>
+        </div>-->
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1">立即提交</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </form>
+
+    <script src="//res.layui.com/layui/dist/layui.js" charset="utf-8"></script>
+    <!-- 注意：如果你直接复制所有代码到本地，上述 JS 路径需要改成你本地的 -->
+    <script>
+        layui.use(['form', 'layedit', 'laydate'], function () {
+            var form = layui.form
+                , layer = layui.layer
+                , layedit = layui.layedit
+                , laydate = layui.laydate;
+            //监听提交
+            form.on('submit(demo1)', function (data) {
+                var obj = {};
+                obj.PId = $("#txtPId").val();
+                obj.Name = $("#txtName").val();
+                obj.ResourceUrl = $("#txtResourceUrl").val();
+                obj.Remark = $("#txtRemark").val();
+                obj.IsEnable = (IsEnable.checked ? 1 : 0);
+
+                var index = parent.layer.getFrameIndex(window.name);
+
+                $.ajax({
+                    url: "/Menus/Add",
+                    type: "post",
+                    data: obj,
+                    success:
+                        function (d) {
+                            if (d > 0) {
+                                parent.layer.close(index);
+                                layer.msg('添加成功');
+                            }
+                            else {
+                                ayer.msg('添加失败');
+                            }
+                        }
+                })
+                return false;
+            });
+
+
+        });
+    </script>
+
+</body>
+</html>

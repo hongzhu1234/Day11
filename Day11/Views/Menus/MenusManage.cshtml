@@ -1,0 +1,154 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Layui</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <script src="~/Content/layui-v2.5.7/layui/layui.js"></script>
+    <link href="~/Content/layui-v2.5.7/layui/css/layui.css" rel="stylesheet" />
+    <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+</head>
+<body>
+    <div class="demoTable">
+        搜索ID：
+        <div class="layui-inline">
+            <input class="layui-input" name="id" id="demoReload" autocomplete="off">
+        </div>
+        <button class="layui-btn" data-type="reload">搜索</button>
+    </div>
+    <div class="layui-btn-group demoTable" style="margin-bottom: 10px;">
+        <button class="layui-btn" data-type="parseTable">添加数据</button>
+    </div>
+    <table class="layui-hide" id="test" lay-filter="demo"></table>
+    <!-- 注意：如果你直接复制所有代码到本地，上述 JS 路径需要改成你本地的 -->
+    <script>
+        layui.use('table', function () {
+            var table = layui.table;
+
+            table.render({
+                elem: '#test'
+                , url: '/Menus/Paging'
+                , cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+                , page: true
+                , limits: [2, 4, 6, 8, 10]
+                , limit: 2
+                , id: 'testReload'
+                , request: {
+                    pageName: 'pindex',
+                    limitName: 'psize'
+                }
+                , cols: [[
+                      { field: 'Id',  title: 'Id' }
+                    , { field: 'PId', title: '父级Id' }
+                    , { field: 'Name', title: '菜单名称' }
+                    , { field: 'ResourceUrl', title: '资源路径' }
+                    , { field: 'Remark', title: '描述' }
+                    , { field: 'IsEnable', title: '是否启用', templet: "#OnTestTpl" }
+                    , { fixed: 'right', align: 'center', toolbar: '#barDemo' }
+
+                ]]
+            });
+
+            var $ = layui.$, active = {
+                reload: function () {
+                    var demoReload = $('#demoReload').val();
+
+                    //执行重载
+                    table.reload('testReload', {
+                        page: {
+                            curr: 1 //重新从第 1 页开始
+                        }
+                        , where: {
+                            name: demoReload
+                        }
+                    }, 'data');
+                }
+            };
+            var $ = layui.$, active = {
+                parseTable: function () {
+                    layer.open({
+                        type: 2,
+                        title: '添加',
+                        shadeClose: true,
+                        shade: 0.8,
+                        area: ['380px', '560px'],
+                        content: '/Menus/Create',//iframe的url
+                        cancel: function () {
+                            tag = 0;
+                        },
+                        end: function () {
+                            if (tag == 0) {
+                                layui.table.reload('testReload', {}, 'data');
+                            }
+                        }
+
+                    });
+                }
+            };
+
+            //监听工具条
+            table.on('tool(demo)', function (obj) {
+                var data = obj.data;
+
+                if (obj.event === 'del') {
+                    layer.confirm('真的删除行么', function (index) {
+                        $.ajax({
+                            url: "/Menus/Del?id=" + data.Id,
+                            type: "post",
+                            success:
+                                function (d) {
+                                    if (d > 0) {
+                                        layer.msg('删除成功');
+                                        layui.table.reload('testReload', {}, 'data');
+                                    }
+                                    else {
+                                        layer.msg('删除失败');
+                                    }
+                                }
+
+                        })
+                    });
+                } else if (obj.event === 'edit') {
+                    var tag = 0;
+                    //iframe层
+                    layer.open({
+                        type: 2,
+                        title: '修改',
+                        shadeClose: true,
+                        shade: 0.8,
+                        area: ['380px', '560px'],
+                        content: '/Menus/Edit?id=' + data.Id,//iframe的url
+                        cancel: function () {
+                            tag = 1;
+                        },
+                        end: function () {
+                            if (tag == 0) {
+                                layui.table.reload('testReload', {}, 'data');
+                            }
+                        }
+                    });
+                }
+            });
+
+            $('.demoTable .layui-btn').on('click', function () {
+                var type = $(this).data('type');
+                active[type] ? active[type].call(this) : '';
+            });
+        });
+    </script>
+    <script type="text/html" id="OnTestTpl">
+        {{d.IsEnable==1?"已启用":"未启用"}}
+    </script>
+    <script type="text/html" id="barDemo">
+        <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+    </script>
+</body>
+</html>
